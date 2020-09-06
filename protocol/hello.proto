@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+message GreetingParams {}
+
+message Greeting { required string greeting = 1; }
+
+service Greeter {
+  rpc GetGreeting(GreetingParams) returns (Greeting) {}
+}
+
+option go_package = "github.com/danpantry/hello-grpc/protocol";
