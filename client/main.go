@@ -5,6 +5,7 @@ import (
 
 	"github.com/danpantry/hello-grpc/protocol"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 var serverAddr = "localhost:5051"
@@ -17,7 +18,11 @@ func main() {
 	defer conn.Close()
 
 	client := protocol.NewGreeterClient(conn)
-	greeting, err := client.GetGreeting(context.Background(), &protocol.GreetingParams{})
+	md := metadata.New(nil)
+	md = protocol.WithJWT(md, []byte("Hello, world!"))
+	ctx := context.Background()
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	greeting, err := client.GetGreeting(ctx, &protocol.GreetingParams{})
 	if err != nil {
 		panic(err)
 	}
