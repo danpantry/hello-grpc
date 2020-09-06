@@ -19,7 +19,7 @@ func main() {
 
 	client := protocol.NewGreeterClient(conn)
 	md := metadata.New(nil)
-	md = protocol.WithJWT(md, []byte("Hello, world!"))
+	md = protocol.WithJWT(md, "Hello, world!")
 	ctx := context.Background()
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	greeting, err := client.GetGreeting(ctx, &protocol.GreetingParams{})

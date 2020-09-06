@@ -1,19 +1,22 @@
 package protocol
 
-import "google.golang.org/grpc/metadata"
+import (
+	"google.golang.org/grpc/metadata"
+)
 
-// TODO: Instead of accepting byte arrays, we should accept something more specific
-// Like a struct with all the claims, which we then set, or something.
-func WithJWT(md metadata.MD, jwt []byte) metadata.MD {
+// WithJWT adds the given JWT to the correct Metadata key to be parsed by the server side.
+func WithJWT(md metadata.MD, jwt string) metadata.MD {
 	md2 := metadata.Pairs("jwt", string(jwt))
 	return metadata.Join(md, md2)
 }
 
-func GetJWT(md metadata.MD) ([]byte, bool) {
+// GetJWT returns a JWT encoded in the given metadata and a flag indicating if the JWT was present.
+func GetJWT(md metadata.MD) (string, bool) {
+	var s string
 	jwts := md.Get("jwt")
 	if len(jwts) == 0 {
-		return nil, false
+		return s, false
 	}
 
-	return []byte(jwts[0]), true
+	return jwts[0], true
 }
