@@ -1,0 +1,5 @@
+# This file contains a list of claims required to access certain RPC calls
+# *All calls are blocked by default*.
+Greeter:
+  GetGreeting:
+    - greeter

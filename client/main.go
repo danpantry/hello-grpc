@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/danpantry/hello-grpc/protocol"
 	"google.golang.org/grpc"
@@ -17,9 +18,12 @@ func main() {
 	}
 	defer conn.Close()
 
+	// TODO: In reality, this JWT would be issued using some other service credentials.
+	// For now, we will use a shared secret.
+	jwt := os.Getenv("AUTHENTICATION_JWT")
 	client := protocol.NewGreeterClient(conn)
 	md := metadata.New(nil)
-	md = protocol.WithJWT(md, "Hello, world!")
+	md = protocol.WithJWT(md, jwt)
 	ctx := context.Background()
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	greeting, err := client.GetGreeting(ctx, &protocol.GreetingParams{})
