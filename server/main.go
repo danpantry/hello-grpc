@@ -157,6 +157,16 @@ func loadPermissions(p *servicePermissionMap) error {
 
 var exitCodeConfigError = 0x1
 
+func hs256(secret []byte) jwt.Keyfunc {
+	return func(tok *jwt.Token) (interface{}, error) {
+		if tok.Method.Alg() != jwt.SigningMethodHS256.Name {
+			return nil, jwt.ErrInvalidKey
+		}
+
+		return secret, nil
+	}
+}
+
 func main() {
 	var permissions servicePermissionMap
 	if err := loadPermissions(&permissions); err != nil {
@@ -164,12 +174,10 @@ func main() {
 		os.Exit(exitCodeConfigError)
 	}
 
-	jwtSecret := os.Getenv("JWT_SIGNING_SECRET")
-	kf := func(*jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
-	}
-
-	server := grpc.NewServer(grpc.UnaryInterceptor(authInterceptor(kf, permissions)))
+	// In reality, you would probably retrieve the signing secret from some asynchronous source not stored with each instance of the gRPC server.
+	kf := hs256([]byte(os.Getenv("JWT_SIGNING_SECRET")))
+	interceptor := authInterceptor(kf, permissions)
+	server := grpc.NewServer(grpc.UnaryInterceptor(interceptor))
 	s := protocol.NewGreeterService(&greetingService{})
 	protocol.RegisterGreeterService(server, s)
 	permissions.Validate(server)

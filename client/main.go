@@ -18,14 +18,10 @@ func main() {
 	}
 	defer conn.Close()
 
-	// TODO: In reality, this JWT would be issued using some other service credentials.
-	// For now, we will use a shared secret.
 	jwt := os.Getenv("AUTHENTICATION_JWT")
 	client := protocol.NewGreeterClient(conn)
-	md := metadata.New(nil)
-	md = protocol.WithJWT(md, jwt)
-	ctx := context.Background()
-	ctx = metadata.NewOutgoingContext(ctx, md)
+	md := protocol.WithJWT(metadata.New(nil), jwt)
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
 	greeting, err := client.GetGreeting(ctx, &protocol.GreetingParams{})
 	if err != nil {
 		panic(err)
